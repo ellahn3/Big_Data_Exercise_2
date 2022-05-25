@@ -7,7 +7,7 @@ Ella Hanzin ID:212028971
 ---
 
 
-librarys
+#librarys
 ```{r}
 library(stringr)
 library(dplyr)
@@ -25,13 +25,13 @@ Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by press
 
 The exercise deals with data from daiting web in the United States.
 
-Load texts
+#Load texts
 ```{r}
 profiles <- read.csv( file.path( 'profiles.csv' ), header=TRUE, stringsAsFactors=FALSE)
 ```
 
 
-Clean texts, tokenize, remove stop words (token, tokens_select)
+#Clean texts, tokenize,  (token, tokens_select)
 ```{r}
 essays <- select(profiles, starts_with("essay"))
 essays <- apply(essays, MARGIN = 1, FUN = paste, collapse=" ")
@@ -45,21 +45,96 @@ stop.words.pat <- paste0( "\\b(", paste(stop.words, collapse = "|"), ")\\b" )
 stop.words.pat
 essays <- str_replace_all(essays, html.pat, " ")
 essays <- str_replace_all(essays, stop.words.pat, " ")
+
 ```
 
 
-Stemming (tokens_wordstem)
+# Tokenize essay texts
 ```{r}
 
+all.tokens <- tokens(essays, what = "word",
+                     remove_numbers = TRUE, remove_punct = TRUE,
+                     remove_symbols = TRUE, remove_hyphens = TRUE)
+
+# Take a look at a specific message and see how it transforms.
+all.tokens[[357]]
+
+# Lower case the tokens.
+all.tokens <- tokens_tolower(all.tokens)
+
+# Use quanteda's built-in stopword list for English.
+# NOTE - You should always inspect stopword lists for applicability to
+#        your problem/domain.
+
 ```
+
+#remove stop words
+```{r}
+
+all.tokens <- tokens_select(all.tokens, stopwords(),
+                            selection = "remove")
+all.tokens[[357]]
+```
+
+
+
+#Stemming (tokens_wordstem)
+```{r}
+
+# Perform stemming on the tokens.
+all.tokens <- tokens_wordstem(all.tokens, language = "english")
+# remove single-word tokens after stemming. Meaningless
+all.tokens <- tokens_select(all.tokens, "^[a-z]$",
+                            selection = "remove", valuetype = "regex")
+all.tokens[[357]]
+
+
+```
+# dfm
+```{r}
+# Create a bag-of-words model (document-term frequency matrix)
+all.tokens.dfm <- dfm(all.tokens, tolower = FALSE)
+rm(all.tokens)
+
+all.tokens.dfm
+
+sparsity(all.tokens.dfm)
+
+```
+
+
 
 (implement your own functions for TF-IDF and then use apply
+our function for trimming
 ```{r}
 
+
 ```
+
+DFM matrix
+```{r}
+# Transform to a matrix and inspect.
+all.tokens.matrix <- as.matrix(dfm.trimmed)
+#View(all.tokens.matrix[1:20, 1:100])
+dim(all.tokens.matrix)
+
+
+```
+
 
 Train a model to identify male vs. female by their texts:
 ```{r}
+#make data frame
+
+# Setup a the feature data frame with labels.
+all.tokens.df <- cbind(Label = profiles$sex, as.data.frame(dfm.trimmed))
+#convert(x, to = "data.frame")
+# Often, tokenization requires some additional pre-processing
+names(all.tokens.df)[c(146, 148, 235, 238)]
+# Cleanup column names.
+names(all.tokens.df) <- make.names(names(all.tokens.df))
+#all.tokens[[357]]
+
 
 ```
 

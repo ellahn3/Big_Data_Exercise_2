@@ -1,0 +1,76 @@
+---
+title: "Week5_datingNLP"
+output: html_notebook
+date: '2022-05-25'
+Naama Shenberger ID:211983747
+Ella Hanzin ID:212028971
+---
+
+
+librarys
+```{r}
+library(stringr)
+library(dplyr)
+library(ggplot2)
+library(mosaic)
+library(dplyr)
+library(stringr)
+library(xtable)
+library(gridExtra)
+library(stopwords)
+library(quanteda)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+The exercise deals with data from daiting web in the United States.
+
+Load texts
+```{r}
+profiles <- read.csv( file.path( 'profiles.csv' ), header=TRUE, stringsAsFactors=FALSE)
+```
+
+
+Clean texts, tokenize, remove stop words (token, tokens_select)
+```{r}
+essays <- select(profiles, starts_with("essay"))
+essays <- apply(essays, MARGIN = 1, FUN = paste, collapse=" ")
+
+html <- c( "<a[^>]+>", "class=[\"'][^\"']+[\"']", "&[a-z]+;", "\n", "\\n", "<br ?/>", "</[a-z]+ ?>" )
+stop.words <-  c( "a", "am", "an", "and", "as", "at", "are", "be", "but", "can", "do", "for", "have", "i'm", "if", "in", "is", "it", "like", "love", "my", "of", "on", "or", "so", "that", "the", "to", "with", "you", "i" )
+
+html.pat <- paste0( "(", paste(html, collapse = "|"), ")" )
+html.pat
+stop.words.pat <- paste0( "\\b(", paste(stop.words, collapse = "|"), ")\\b" )
+stop.words.pat
+essays <- str_replace_all(essays, html.pat, " ")
+essays <- str_replace_all(essays, stop.words.pat, " ")
+```
+
+
+Stemming (tokens_wordstem)
+```{r}
+
+```
+
+(implement your own functions for TF-IDF and then use apply
+```{r}
+
+```
+
+Train a model to identify male vs. female by their texts:
+```{r}
+
+```
+
+Removing the batch effect: find and eliminate “male words” and “female words”
+```{r}
+
+```
+
+Cluster the applicants to 2,3,4 and 10 clusters (kmeans)
+
+```{r}
+
+```
+

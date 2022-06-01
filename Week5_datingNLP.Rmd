@@ -5,6 +5,18 @@ date: '2022-05-25'
 Naama Shenberger ID:211983747
 Ella Hanzin ID:212028971
 ---
+```{r}
+install.packages("stringr")
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("mosaic")
+install.packages("dplyr")
+install.packages("stringr")
+install.packages("xtable")
+install.packages("gridExtra")
+install.packages("stopwords")
+install.packages("quanteda")
+```
 
 
 #librarys
@@ -56,8 +68,6 @@ all.tokens <- tokens(essays, what = "word",
                      remove_numbers = TRUE, remove_punct = TRUE,
                      remove_symbols = TRUE, remove_hyphens = TRUE)
 
-# Take a look at a specific message and see how it transforms.
-all.tokens[[357]]
 
 # Lower case the tokens.
 all.tokens <- tokens_tolower(all.tokens)
@@ -73,7 +83,7 @@ all.tokens <- tokens_tolower(all.tokens)
 
 all.tokens <- tokens_select(all.tokens, stopwords(),
                             selection = "remove")
-all.tokens[[357]]
+
 ```
 
 
@@ -86,7 +96,7 @@ all.tokens <- tokens_wordstem(all.tokens, language = "english")
 # remove single-word tokens after stemming. Meaningless
 all.tokens <- tokens_select(all.tokens, "^[a-z]$",
                             selection = "remove", valuetype = "regex")
-all.tokens[[357]]
+
 
 
 ```
@@ -107,17 +117,54 @@ sparsity(all.tokens.dfm)
 (implement your own functions for TF-IDF and then use apply
 our function for trimming
 ```{r}
-
-
+#TF:
+term.frequency<-function(row)
+{
+ row/sum(row)  
+}
+#IDF
+inverse.doc.freq<-function(col)
+{
+  corpus.size<-length(col)
+  doc.count<-length(which(col>0))
+  log10(corpus.size/doc.count)
+}
+#TF-IDF
+tf.idf<-function(x,idf)
+{
+  x*idf
+}
+#
+all.tokens.df<-apply(all.tokens.dfm, 1,term.frequency )
+dim(all.tokens.df)
+all.tokens.df[1:20,1:100]
 ```
 
 DFM matrix
 ```{r}
+dfm.trimmed <- dfm_trim(all.tokens.dfm, min_docfreq = 10, min_termfreq = 20, verbose = TRUE)
+dfm.trimmed
+# Transform to a matrix and inspect.
+# top-50 frequent features
+topfeatures(dfm.trimmed, 50)
+
+# Top features of individual documents. WARNING - takes long to run
+# top.features <- topfeatures(dfm.trimmed, n = 7, groups = docnames(dfm.trimmed))
+#save(top.features, file=file.path( 'dating', "Week5_datingNLP.rdata") )
+
+# features by document frequencies
+tail(topfeatures(dfm.trimmed, scheme = "docfreq", n = 200))
+
+#tstat_freq <- textstat_frequency(dfm.trimmed, n = 5, groups = lang)
+#head(tstat_freq, 20)
+
 # Transform to a matrix and inspect.
 all.tokens.matrix <- as.matrix(dfm.trimmed)
 #View(all.tokens.matrix[1:20, 1:100])
 dim(all.tokens.matrix)
-
+all.tokens.df<-apply(all.tokens.matrix, 1,term.frequency )
+dim(all.tokens.df)
+all.tokens.df[1:20,1:100]
 
 ```
 
